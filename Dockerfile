@@ -21,9 +21,12 @@ RUN apt-get update && \
 RUN apt-get install -y jq
 RUN bash -c "jq --version"
 
-# jq
+# make
 RUN apt-get install -y make
 RUN bash -c "make --version"
+
+# just
+RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 
 # docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
