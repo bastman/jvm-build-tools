@@ -42,7 +42,7 @@ $ docker run --rm -it ci-jvm-build-tools:java-8 bash
 
 # misc: build some-project using ci-jvm-build-tools:java-11 ...
 
-$ cd some-project
+$ cd <some-project>
 $ docker run --rm -it -v ${PWD}:/project ci-jvm-build-tools:java-11 cd /project && <enter-commands-here>
 
 ```
