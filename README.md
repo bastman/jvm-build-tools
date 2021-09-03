@@ -25,7 +25,7 @@ see: https://github.com/casey/just
 # java 11
 $ just docker-build-java11
 
-# java8
+# java 8
 $ just docker-build-java8
 
 ```
