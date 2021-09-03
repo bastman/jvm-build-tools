@@ -1,17 +1,19 @@
 FROM debian:stretch-slim
 
-# Defining default Java and Maven version
-ARG JAVA_VERSION="8.0.292.hs-adpt"
-ARG MAVEN_VERSION="3.6.2"
+# define default build args
+ARG SDK_JAVA_VERSION="8.0.292.hs-adpt"
 
 # Defining default non-root user UID, GID, and name
-ARG USER_UID="1000"
-ARG USER_GID="1000"
-ARG USER_NAME="jenkins"
+#ARG USER_UID="1000"
+#ARG USER_GID="1000"
+#ARG USER_NAME="jenkins"
 
 # Creating default non-user
-RUN groupadd -g $USER_GID $USER_NAME && \
-	useradd -m -g $USER_GID -u $USER_UID $USER_NAME
+#RUN groupadd -g $USER_GID $USER_NAME && \
+#	useradd -m -g $USER_GID -u $USER_UID $USER_NAME
+
+# Switching to non-root user
+#USER $USER_UID:$USER_GID
 
 # Installing basic packages
 RUN apt-get update && \
@@ -39,37 +41,28 @@ RUN apt -y install docker-ce docker-ce-cli containerd.io docker-compose
 RUN rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
 
-
-#RUN sfagsg
-
-
-
-# Switching to non-root user to install SDKMAN!
-USER $USER_UID:$USER_GID
-
-
-# Downloading SDKMAN!
+# sdkman: download
 RUN curl -s "https://get.sdkman.io" | bash
+RUN echo "sdkman_auto_answer=true" > /root/.sdkman/etc/config && \
+    echo "sdkman_selfupdate_enable=false" >> /root/.sdkman/etc/config && \
+    echo "sdkman_auto_env=false" >> /root/.sdkman/etc/config && \
+    echo "sdkman_insecure_ssl=true" >> /root/.sdkman/etc/config
+# sdkman: Installing Java and Maven, removing some unnecessary SDKMAN files
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    yes | sdk selfupdate && \
 
-# Installing Java and Maven, removing some unnecessary SDKMAN files
-#RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-#    yes | sdk selfupdate && \
-#    sdk list java && \
-#    yes | sdk install java $JAVA_VERSION && \
-#    rm -rf $HOME/.sdkman/archives/* && \
-#    rm -rf $HOME/.sdkman/tmp/* "
+    sdk list java && \
+    yes | sdk install java $SDK_JAVA_VERSION" \
 
-#RUN bash -c "sdk selfupdate"
-#RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-#    yes | sdk install java $JAVA_VERSION && \
-#    yes | sdk install maven $MAVEN_VERSION && \
-#    rm -rf $HOME/.sdkman/archives/* && \
-#    rm -rf $HOME/.sdkman/tmp/*"
+RUN java -version
 
-# ENTRYPOINT bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && $0 $@" 
+# sdkman: cleanup
+RUN bash -c "rm -rf $HOME/.sdkman/archives/* && \
+    rm -rf $HOME/.sdkman/tmp/* "
 
-#ENV MAVEN_HOME="/home/jenkins/.sdkman/candidates/maven/current"
-#ENV JAVA_HOME="/home/jenkins/.sdkman/candidates/java/current"
-#ENV PATH="$MAVEN_HOME/bin:$JAVA_HOME/bin:$PATH"
+# entrypoint: init sdkman
+ENTRYPOINT bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && $0 $@"
+
+
 
 
